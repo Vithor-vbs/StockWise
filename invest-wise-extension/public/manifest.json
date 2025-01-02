@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Stock Wise",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "stockwiseLogo.png",
+      "32": "stockwiseLogo.png",
+      "48": "stockwiseLogo.png",
+      "128": "stockwiseLogo.png"
+    }
+  },
+  "permissions": ["scripting"],
+  "host_permissions": ["https://*/*", "http://*/*"],
+  "icons": {
+    "16": "stockwiseLogo.png",
+    "32": "stockwiseLogo.png",
+    "48": "stockwiseLogo.png",
+    "128": "stockwiseLogo.png"
+  }
+}

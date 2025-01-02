@@ -1,0 +1,25 @@
+#root {
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.main-container {
+  margin: 3rem 3rem;
+}
+
+.cards-container-grid {
+  display: flex;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.dropdown-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dividend-general-info {
+  display: flex;
+  gap: 4rem;
+  margin: 0.5rem 0;
+}

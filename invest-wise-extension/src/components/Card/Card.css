@@ -1,0 +1,68 @@
+.card-container {
+  padding: 1rem;
+  background-color: #1c1c24;
+  border-radius: 15px;
+  width: 100%;
+  position: relative;
+}
+.card-container:hover {
+  box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.5);
+}
+
+.variation-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  visibility: hidden;
+  width: 200px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: -270%;
+  left: 50%;
+  transform: translateX(-60%);
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.5s;
+  font-weight: 400;
+}
+
+.variation-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.card-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-weight: 1000;
+}
+.card-entity-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card-entity-edit {
+  font-size: 1.2rem;
+}
+
+.entity-variation {
+  font-weight: 500;
+  transition: text-shadow 0.3s ease-in-out;
+}
+.entity-variation-icon {
+  color: #555;
+  font-size: 1rem;
+}
+
+.entity-variation:hover {
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.2),
+    0 0 5px rgba(255, 255, 255, 0.1);
+}
