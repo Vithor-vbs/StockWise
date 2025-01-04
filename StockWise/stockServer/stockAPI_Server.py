@@ -66,15 +66,39 @@ def get_stock_data():
 
     p_e_ratio = info.get('trailingPE')
     profit_margin = info.get('profitMargins')
-    dividend_yield = info.get('dividendYield') * 100
+    dividend_yield = info.get('dividendYield')
     dividend_per_share = info.get('dividendRate')
     book_value = info.get('currentPrice')
     eps = info.get('trailingEps')
+
+    # New metrics
+    forward_pe = info.get('forwardPE')
+    price_to_sales = info.get('priceToSalesTrailing12Months')
+    price_to_book = info.get('priceToBook')
+    five_year_avg_dividend_yield = info.get('fiveYearAvgDividendYield') or 0
+
+    target_high_price = info.get('targetHighPrice')
+    target_low_price = info.get('targetLowPrice')
+    target_mean_price = info.get('targetMeanPrice')
+    target_median_price = info.get('targetMedianPrice')
+
+    return_on_equity = info.get('returnOnEquity')
+    payout_ratio = (info.get('payoutRatio') or 0)
+    revenue_growth = (info.get('revenueGrowth') or 0)
+    return_on_assets = (info.get('returnOnAssets') or 0)
 
     graham_formula_value = (
         22.5 * eps * book_value) ** 0.5 if eps and book_value else None
     peter_lynch_ratio = p_e_ratio / (0.10 * 100) if p_e_ratio else None
     total_dividends_accumulated = sum(earnings) if len(earnings) > 0 else None
+    dividend_payout_ratio = (dividend_per_share / eps) if eps else None
+    dividend_coverage_ratio = eps / dividend_per_share if dividend_per_share else None
+
+    def calculate_dividend_growth_rate(earnings, years):
+        earnings_by_year = calculate_dividend_by_year(earnings, years)
+        first_dividend = earnings_by_year.iloc[0]
+        last_dividend = earnings_by_year.iloc[-1]
+        return ((last_dividend / first_dividend) ** (1 / years)) - 1
 
     result = {
         "info": {
@@ -90,7 +114,23 @@ def get_stock_data():
             "graham_formula_value": graham_formula_value,
             "peter_lynch_ratio": peter_lynch_ratio,
             "projected_ceiling_price": projected_ceiling_price,
-            "total_dividends_accumulated": total_dividends_accumulated
+            "total_dividends_accumulated": total_dividends_accumulated,
+            "dividend_payout_ratio": dividend_payout_ratio,
+            "dividend_coverage_ratio": dividend_coverage_ratio,
+            "dividend_growth_rate": calculate_dividend_growth_rate(earnings, years_to_consider),
+
+            "forward_pe": forward_pe,
+            "price_to_sales": price_to_sales,
+            "price_to_book": price_to_book,
+            "return_on_equity": return_on_equity,
+            "payout_ratio": payout_ratio,
+            "five_year_avg_dividend_yield": five_year_avg_dividend_yield,
+            "target_high_price": target_high_price,
+            "target_low_price": target_low_price,
+            "target_mean_price": target_mean_price,
+            "target_median_price": target_median_price,
+            "revenue_growth": revenue_growth,
+            "return_on_assets": return_on_assets
         },
     }
 
@@ -112,18 +152,17 @@ def get_historical_earnings():
 @app.route('/get_recent_prices', methods=['GET'])
 def get_recent_prices():
     ticker = request.args.get('ticker')
-    months = request.args.get('months')
+    days = request.args.get('days')
 
-    if not ticker or not months:
-        return jsonify({'error': 'ticker and months parameters are required'}), 400
+    if not ticker or not days:
+        return jsonify({'error': 'ticker and days parameters are required'}), 400
 
     try:
-        months = int(months)
+        days = int(days)
     except ValueError:
-        return jsonify({'error': 'months parameter must be an integer'}), 400
+        return jsonify({'error': 'days parameter must be an integer'}), 400
 
-    start_date = (datetime.now() - timedelta(days=months*30)
-                  ).strftime('%Y-%m-%d')
+    start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
     end_date = datetime.now().strftime('%Y-%m-%d')
 
     prices = fetch_prices(ticker, start_date, end_date)
