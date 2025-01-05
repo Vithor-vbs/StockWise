@@ -17,6 +17,7 @@ import Chart from "./components/utils/Chart";
 import BarChart from "./components/utils/BarChart";
 import { Dropdown } from "./components/utils/Dropdown";
 import Slider from "./components/Slider/Slider";
+import { PercentageCircle } from "./components/PercentageCircle/PercentageCircle";
 
 const App: React.FC = () => {
   const [ticker, setTicker] = useState("bbas3.sa");
@@ -265,24 +266,14 @@ const App: React.FC = () => {
             <Card
               title="Price to Book"
               info={stockData?.analysis.price_to_book.toFixed(2)}
+              variation={"help-icon"}
+              additionalInfo="A valuation metric that compares a company's current share price to its book value."
             />
             <Card
               title="Return on Equity"
               info={(stockData?.analysis.return_on_equity * 100).toFixed(2)}
               variation={"help-icon"}
-              additionalInfo="A measure of a company's profitability that takes a company's net income and divides it by the shareholders' equity."
-            />
-          </div>
-          <div className="cards-container-grid">
-            <Card
-              title="Five Year Average Dividend Yield"
-              info={`${(stockData?.analysis.five_year_avg_dividend_yield).toFixed(
-                2
-              )}%`}
-            />
-            <Card
-              title="Payout Ratio"
-              info={`${(stockData?.analysis.payout_ratio * 100).toFixed(2)}%`}
+              additionalInfo="ROE: A measure of a company's profitability that takes a company's net income and divides it by the shareholders' equity."
             />
           </div>
           <div className="cards-container-grid">
@@ -293,6 +284,21 @@ const App: React.FC = () => {
             <Card
               title="Revenue Growth"
               info={(stockData?.analysis.revenue_growth * 100).toFixed(2)}
+            />
+          </div>
+
+          <div className="circle-container">
+            <p className="circle-container-title">Payout Ratio: </p>
+            <PercentageCircle
+              percentage={stockData?.analysis.payout_ratio * 100}
+              color="rgba(75, 192, 192, 1)"
+            />
+            <p className="circle-container-title">
+              Five Year Avarage Divididend Yield:
+            </p>
+            <PercentageCircle
+              percentage={stockData?.analysis.five_year_avg_dividend_yield}
+              color="#1a73e8"
             />
           </div>
         </>

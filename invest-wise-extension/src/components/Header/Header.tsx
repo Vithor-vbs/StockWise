@@ -3,6 +3,7 @@ import "./Header.css";
 import logo from "../../assets/stockwise logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleQuestion } from "@fortawesome/free-regular-svg-icons";
+import { faUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 // import { InfoCard } from "../InfoCard/InfoCard";
 
 interface HeaderProps {
@@ -31,7 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   setCurrencySymbol,
 }) => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  // const [infoVisible, setInfoVisible] = useState(false);
+  const [isIconVisible, setIsIconVisible] = useState(true);
 
   // State to hold local ticker history
   const [recentTickers, setRecentTickers] = useState<string[]>([]);
@@ -71,15 +72,25 @@ export const Header: React.FC<HeaderProps> = ({
   //   setInfoVisible(false);
   // };
 
+  const handleInfoClick = () => {
+    if (chrome && chrome.tabs) {
+      chrome.tabs.create({ url: chrome.runtime.getURL("index.html") }, () => {
+        setIsIconVisible(false);
+      });
+    }
+  };
+
   return (
     <div className="header-container">
       <div className="header-logo-box">
         <img src={logo} alt="Stock Wise Logo" className="header-logo" />
-        {/* <FontAwesomeIcon
-          onClick={handleInfoClick}
-          className="header-logo-icon"
-          icon={faCircleQuestion}
-        /> */}
+        {isIconVisible && (
+          <FontAwesomeIcon
+            onClick={handleInfoClick}
+            className="header-logo-icon"
+            icon={faUpRightFromSquare}
+          />
+        )}
       </div>
       {/* {infoVisible && <InfoCard onClose={handleCloseInfo} />} */}
       <section className="input-container">

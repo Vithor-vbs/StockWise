@@ -11,7 +11,7 @@
       "128": "stockwiseLogo.png"
     }
   },
-  "permissions": ["scripting"],
+  "permissions": ["scripting, tabs"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "icons": {
     "16": "stockwiseLogo.png",
