@@ -1,86 +1,102 @@
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 
-interface SliderProps {
-  items: { text: string; value: string }[];
+interface SliderItem {
+  text: string;
+  value: string;
 }
 
+interface SliderProps {
+  items: SliderItem[];
+}
+const SliderContent = styled.div`
+  display: inline-block;
+  animation: scroll 50s linear infinite; /* Slowed down the animation */
+  animation-play-state: running; /* Ensure animation is running by default */
+
+  @keyframes scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+`;
+
+const SliderContainer = styled.div`
+  overflow: hidden;
+  padding: 10px 0; /* Decreased the size of the box */
+  background: #13131a;
+  white-space: nowrap;
+  position: relative;
+
+  &:before,
+  &:after {
+    position: absolute;
+    top: 0;
+    width: 80px; /* Decreased the width of the gradient */
+    height: 100%;
+    content: "";
+    z-index: 2;
+  }
+
+  &:before {
+    left: 0;
+    background: linear-gradient(
+      to left,
+      rgba(19, 19, 26, 0),
+      #13131a
+    ); /* Adjusted gradient */
+  }
+
+  &:after {
+    right: 0;
+    background: linear-gradient(
+      to right,
+      rgba(19, 19, 26, 0),
+      #13131a
+    ); /* Adjusted gradient */
+  }
+
+  /* &:hover ${SliderContent} {
+    animation-play-state: paused;
+  } */
+`;
+
 const Slider: React.FC<SliderProps> = ({ items }) => {
+  const sliderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (slider) {
+      const clone = slider.innerHTML;
+      slider.innerHTML += clone;
+    }
+  }, []);
+
   return (
-    <StyledWrapper>
-      <div className="slider">
-        <div className="text">
-          {items.map((item, index) => (
-            <span key={index}>
-              {item.text}
-              <span
-                className="item-value"
-                style={{
-                  color: parseFloat(item.value) < 0 ? "#ef5757" : "#1a73e8",
-                }}
-              >
-                {item.value}
-              </span>
+    <SliderContainer>
+      <SliderContent ref={sliderRef}>
+        {items.concat(items).map((item, index) => (
+          <SliderItem key={index}>
+            <strong>{item.text}</strong>{" "}
+            <span style={{ color: "#1a73e8", fontWeight: "bold" }}>
+              {" "}
+              {item.value}
             </span>
-          ))}
-          {items.map((item, index) => (
-            <span key={index + items.length}>
-              {item.text}
-              <span
-                className="item-value"
-                style={{
-                  color: parseFloat(item.value) < 0 ? "#ef5757" : "#1a73e8",
-                }}
-              >
-                {item.value}
-              </span>
-            </span>
-          ))}
-        </div>
-      </div>
-    </StyledWrapper>
+          </SliderItem>
+        ))}
+      </SliderContent>
+    </SliderContainer>
   );
 };
 
-const StyledWrapper = styled.div`
-  .slider {
-    width: 100%;
-    height: 40px;
-    white-space: nowrap;
-    overflow: hidden;
-    border-radius: 10px;
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
-  .text {
-    display: flex;
-    align-items: center;
-    animation: sliding 30s linear infinite;
-  }
-
-  .text span {
-    margin: 0 15px;
-    display: inline-block;
-  }
-
-  .item-value {
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-
-  .slider:hover .text {
-    animation-play-state: paused;
-  }
-
-  @keyframes sliding {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
+const SliderItem = styled.div`
+  display: inline-block;
+  height: 40px; /* Decreased the height of the items */
+  margin: 0 20px; /* Adjusted the margin */
+  line-height: 40px; /* Adjusted the line height */
 `;
 
 export default Slider;

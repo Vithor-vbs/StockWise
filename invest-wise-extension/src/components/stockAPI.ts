@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// const BASE_URL = "http://localhost:5000";
-const BASE_URL = "https://stockwise-2cgn.onrender.com";
+const BASE_URL = "http://localhost:5000";
+// const BASE_URL = "https://stockwise-2cgn.onrender.com";
 
 // Define response types for the endpoints
 export interface StockDataResponse {
