@@ -20,7 +20,7 @@ import Slider from "./components/Slider/Slider";
 import { PercentageCircle } from "./components/PercentageCircle/PercentageCircle";
 
 const App: React.FC = () => {
-  const [ticker, setTicker] = useState("bbas3.sa");
+  const [ticker, setTicker] = useState("");
   const [desiredDividendYield, setDesiredDividendYield] = useState("6");
   const [years, setYears] = useState("5");
   const [period, setPeriod] = useState(180); // State for selected period
