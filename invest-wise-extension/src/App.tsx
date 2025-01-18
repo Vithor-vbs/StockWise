@@ -1,4 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  lazy,
+  Suspense,
+} from "react";
 import axios from "axios";
 import { Header } from "./components/Header/Header";
 import { Card } from "./components/Card/Card";
@@ -13,11 +20,12 @@ import {
 import "./App.css";
 
 import { Loader } from "./components/utils/Loader";
-import Chart from "./components/utils/Chart";
-import BarChart from "./components/utils/BarChart";
 import { Dropdown } from "./components/utils/Dropdown";
 import Slider from "./components/Slider/Slider";
 import { PercentageCircle } from "./components/PercentageCircle/PercentageCircle";
+
+const Chart = lazy(() => import("./components/utils/Chart"));
+const BarChart = lazy(() => import("./components/utils/BarChart"));
 
 const App: React.FC = () => {
   const [ticker, setTicker] = useState("");
@@ -35,7 +43,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAllStockData = async () => {
+  const fetchAllStockData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -64,7 +72,7 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [ticker, desiredDividendYield, years, period]);
 
   useEffect(() => {
     const fetchRecentPrices = async () => {
@@ -75,117 +83,162 @@ const App: React.FC = () => {
     if (ticker && stockData) {
       fetchRecentPrices();
     }
-  }, [period]);
+  }, [ticker, stockData, period]);
 
-  const chartData = recentPrices
-    ? Object.values(recentPrices).map((price) => price.Close)
-    : [];
-  const chartLabels = recentPrices
-    ? Object.keys(recentPrices).map((date) => date.split(" ")[0])
-    : [];
+  const chartData = useMemo(
+    () =>
+      recentPrices
+        ? Object.values(recentPrices).map((price) => price.Close)
+        : [],
+    [recentPrices]
+  );
+  const chartLabels = useMemo(
+    () =>
+      recentPrices
+        ? Object.keys(recentPrices).map((date) => date.split(" ")[0])
+        : [],
+    [recentPrices]
+  );
 
-  const barChartData = dividendByYear ? Object.values(dividendByYear) : [];
-  const barChartLabels = dividendByYear ? Object.keys(dividendByYear) : [];
-  const dividendTotalSum = barChartData.reduce((a, b) => a + b, 0);
-  const dividendMean = dividendTotalSum / barChartData.length;
+  const barChartData = useMemo(
+    () => (dividendByYear ? Object.values(dividendByYear) : []),
+    [dividendByYear]
+  );
+  const barChartLabels = useMemo(
+    () => (dividendByYear ? Object.keys(dividendByYear) : []),
+    [dividendByYear]
+  );
+  const dividendTotalSum = useMemo(
+    () => barChartData.reduce((a, b) => a + b, 0),
+    [barChartData]
+  );
+  const dividendMean = useMemo(
+    () => dividendTotalSum / barChartData.length,
+    [dividendTotalSum, barChartData]
+  );
   const dividendCoverageRatio = stockData?.analysis.dividend_coverage_ratio;
   const dividendPayoutRatio =
     (stockData?.analysis.dividend_payout_ratio ?? 0) * 100;
   const dividendGrowthRate =
     (stockData?.analysis.dividend_growth_rate ?? 0) * 100;
 
-  const calculatePercentageChange = (
-    currentValue: number,
-    lastValue: number
-  ) => {
-    if (!currentValue || !lastValue) return null;
-    return ((currentValue - lastValue) / lastValue) * 100;
-  };
-
-  const recentPricesKeys = recentPrices ? Object.keys(recentPrices) : [];
-
-  const penultimatePrice =
-    recentPrices && recentPricesKeys.length > 1
-      ? parseFloat(
-          recentPrices[
-            recentPricesKeys[recentPricesKeys.length - 2]
-          ].Close.toFixed(2)
-        )
-      : null;
-
-  const bookValue = stockData ? stockData.info.book_value : null;
-  const percentageChange = calculatePercentageChange(
-    bookValue as number,
-    penultimatePrice as number
+  const calculatePercentageChange = useCallback(
+    (currentValue: number, lastValue: number) => {
+      if (!currentValue || !lastValue) return null;
+      return ((currentValue - lastValue) / lastValue) * 100;
+    },
+    []
   );
 
-  const sliderDividendInfo = [
-    {
-      text: "Dividend total sum in period:",
-      value: `${currencySymbol}${parseFloat(
-        dividendTotalSum.toString()
-      ).toFixed(2)}`,
-    },
-    {
-      text: "Mean of dividends in period:",
-      value: `${currencySymbol}${parseFloat(dividendMean.toString()).toFixed(
-        2
-      )}`,
-    },
-    {
-      text: "Dividend Coverage Ratio:",
-      value: parseFloat(dividendCoverageRatio?.toString() || "0").toFixed(2),
-    },
-    {
-      text: "Dividend Payout Ratio:",
-      value: `${parseFloat(dividendPayoutRatio?.toString() || "0").toFixed(
-        2
-      )}%`,
-    },
-    {
-      text: "Dividend Growth Rate:",
-      value: `${parseFloat(dividendGrowthRate?.toString() || "0").toFixed(2)}%`,
-    },
-  ];
+  const recentPricesKeys = useMemo(
+    () => (recentPrices ? Object.keys(recentPrices) : []),
+    [recentPrices]
+  );
 
-  const SliderPricesInfo = [
-    {
-      text: "Target High Price:",
-      value:
-        stockData?.analysis.target_high_price !== undefined
-          ? `${currencySymbol}${parseFloat(
-              stockData.analysis.target_high_price.toString()
-            ).toFixed(2)}`
-          : "N/A",
-    },
-    {
-      text: "Target Low Price:",
-      value:
-        stockData?.analysis.target_low_price !== undefined
-          ? `${currencySymbol}${parseFloat(
-              stockData.analysis.target_low_price.toString()
-            ).toFixed(2)}`
-          : "N/A",
-    },
-    {
-      text: "Target Mean Price:",
-      value:
-        stockData?.analysis.target_mean_price !== undefined
-          ? `${currencySymbol}${parseFloat(
-              stockData.analysis.target_mean_price.toString()
-            ).toFixed(2)}`
-          : "N/A",
-    },
-    {
-      text: "Target Median Price:",
-      value:
-        stockData?.analysis.target_median_price !== undefined
-          ? `${currencySymbol}${parseFloat(
-              stockData.analysis.target_median_price.toString()
-            ).toFixed(2)}`
-          : "N/A",
-    },
-  ];
+  const penultimatePrice = useMemo(
+    () =>
+      recentPrices && recentPricesKeys.length > 1
+        ? parseFloat(
+            recentPrices[
+              recentPricesKeys[recentPricesKeys.length - 2]
+            ].Close.toFixed(2)
+          )
+        : null,
+    [recentPrices, recentPricesKeys]
+  );
+
+  const bookValue = stockData ? stockData.info.book_value : null;
+  const percentageChange = useMemo(
+    () =>
+      calculatePercentageChange(
+        bookValue as number,
+        penultimatePrice as number
+      ),
+    [bookValue, penultimatePrice, calculatePercentageChange]
+  );
+
+  const sliderDividendInfo = useMemo(
+    () => [
+      {
+        text: "Dividend total sum in period:",
+        value: `${currencySymbol}${parseFloat(
+          dividendTotalSum.toString()
+        ).toFixed(2)}`,
+      },
+      {
+        text: "Mean of dividends in period:",
+        value: `${currencySymbol}${parseFloat(dividendMean.toString()).toFixed(
+          2
+        )}`,
+      },
+      {
+        text: "Dividend Coverage Ratio:",
+        value: parseFloat(dividendCoverageRatio?.toString() || "0").toFixed(2),
+      },
+      {
+        text: "Dividend Payout Ratio:",
+        value: `${parseFloat(dividendPayoutRatio?.toString() || "0").toFixed(
+          2
+        )}%`,
+      },
+      {
+        text: "Dividend Growth Rate:",
+        value: `${parseFloat(dividendGrowthRate?.toString() || "0").toFixed(
+          2
+        )}%`,
+      },
+    ],
+    [
+      currencySymbol,
+      dividendTotalSum,
+      dividendMean,
+      dividendCoverageRatio,
+      dividendPayoutRatio,
+      dividendGrowthRate,
+    ]
+  );
+
+  const SliderPricesInfo = useMemo(
+    () => [
+      {
+        text: "Target High Price:",
+        value:
+          stockData?.analysis.target_high_price !== undefined
+            ? `${currencySymbol}${parseFloat(
+                stockData.analysis.target_high_price.toString()
+              ).toFixed(2)}`
+            : "N/A",
+      },
+      {
+        text: "Target Low Price:",
+        value:
+          stockData?.analysis.target_low_price !== undefined
+            ? `${currencySymbol}${parseFloat(
+                stockData.analysis.target_low_price.toString()
+              ).toFixed(2)}`
+            : "N/A",
+      },
+      {
+        text: "Target Mean Price:",
+        value:
+          stockData?.analysis.target_mean_price !== undefined
+            ? `${currencySymbol}${parseFloat(
+                stockData.analysis.target_mean_price.toString()
+              ).toFixed(2)}`
+            : "N/A",
+      },
+      {
+        text: "Target Median Price:",
+        value:
+          stockData?.analysis.target_median_price !== undefined
+            ? `${currencySymbol}${parseFloat(
+                stockData.analysis.target_median_price.toString()
+              ).toFixed(2)}`
+            : "N/A",
+      },
+    ],
+    [currencySymbol, stockData]
+  );
 
   return (
     <section className="main-container">
@@ -285,7 +338,9 @@ const App: React.FC = () => {
           <div className="dropdown-container">
             <Dropdown setPeriod={setPeriod} />
           </div>
-          <Chart data={chartData} labels={chartLabels} />
+          <Suspense fallback={<Loader />}>
+            <Chart data={chartData} labels={chartLabels} />
+          </Suspense>
           <Slider items={SliderPricesInfo} />
 
           <div className="cards-container-grid">
@@ -375,7 +430,9 @@ const App: React.FC = () => {
                 color="#1a73e8"
               />
             </div>
-            <BarChart data={barChartData} labels={barChartLabels} />
+            <Suspense fallback={<Loader />}>
+              <BarChart data={barChartData} labels={barChartLabels} />
+            </Suspense>
             <Slider items={sliderDividendInfo} />
 
             <div className="cards-container-grid">
