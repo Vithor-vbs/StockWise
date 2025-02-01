@@ -11,7 +11,7 @@
       "128": "stockwiseLogo.png"
     }
   },
-  "permissions": ["tabs"],
+  "permissions": [],
   "icons": {
     "16": "stockwiseLogo.png",
     "32": "stockwiseLogo.png",
