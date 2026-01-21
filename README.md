@@ -2,6 +2,8 @@
 
 Take your stock analysis to the next level with StockWise, the ultimate tool designed for investors of all levels. Whether you're a dividend seeker or looking for valuation and price opportunities, StockWise provides you with the key metrics and indicators you need—all in one place.
 
+https://github.com/user-attachments/assets/29bcc4da-a184-4b92-bf59-46bfaec83875
+
 ## Features
 
 ### User-Friendly Interface
